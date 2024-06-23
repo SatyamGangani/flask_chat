@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="container text-center">
+        <h2>Chat App</h2>
+        <div class="row col-8 mt-3 mx-auto">
+            <form action="/chat" method="post">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingInputUser" name="user_name" placeholder="Name">
+                    <label for="floatingInputUser">User Name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="floatingInputRoom" name="room_name" placeholder="Room Name">
+                    <label for="floatingInputRoom">Room Name</label>
+                </div>
+                <input type="submit" value="Join" class="btn btn-outline-primary">
+            </form>
+        </div>    
+    </div>
+{% endblock %}
