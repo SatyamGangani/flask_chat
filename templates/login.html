@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="container text-center align-content-center" style="height: 100vh;">
+        <div class="row col-8 mt-3 mx-auto">
+            <h2>Login</h2>
+            <form action="/login" method="post">
+                <div class="form-floating mb-3 mt-2">
+                    <input type="text" class="form-control" id="floatingInputUser" name="user_name" placeholder="Name" value="{{ user or '' }}">
+                    <label for="floatingInputUser">User Name</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="floatingInputPassword" name="password" placeholder="Password">
+                    <label for="floatingInputPassword">Password</label>
+                </div>
+                <input type="submit" name="login" value="Login" class="btn btn-outline-primary">
+                {% if err_message %}
+                    <div class="alert alert-danger mt-4">{{ err_message }}</div>
+                {% endif %}
+                <p>Don't have account ? <a href="/signup" class="text-decoration-none text-primary">Click Here</a></p>
+            </form>
+        </div>    
+    </div>
+{% endblock %}

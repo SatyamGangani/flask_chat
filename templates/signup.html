@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block body %}
+
+    <div class="container text-center align-content-center" style="height: 100vh;">
+        <div class="row col-8 mt-3 mx-auto">
+            <h2>Sign Up</h2>
+            <form action="/signup" method="post">
+                <div class="form-floating mb-3 mt-2">
+                    <input type="text" class="form-control" id="floatingInputUser" name="user_name" placeholder="Name" value="{{ user or '' }}">
+                    <label for="floatingInputUser">User Name</label>
+                </div>
+                <div class="form-floating mb-3 mt-2">
+                    <input type="email" class="form-control" id="floatingInputUserEmail" name="email" placeholder="Email" value="{{ email or '' }}">
+                    <label for="floatingInputUserEmail">Email</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="floatingInputPassword" name="password" placeholder="Password">
+                    <label for="floatingInputPassword">Password</label>
+                </div>
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="floatingInputConfirmPassword" name="confirm_password" placeholder="Confirm Password">
+                    <label for="floatingInputConfirmPassword">Confirm Password</label>
+                </div>
+                <input type="submit" name="login" value="Login" class="btn btn-outline-primary">
+                {% if err_message %}
+                    <div class="alert alert-danger mt-4">{{ err_message }}</div>
+                {% endif %}
+                <p>Already registered ? <a href="/login" class="text-decoration-none text-primary">Click Here</a></p>
+            </form>
+        </div>    
+    </div>
+{% endblock %}

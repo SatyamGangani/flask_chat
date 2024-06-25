@@ -9,7 +9,7 @@
                 
             </div>
             <div class="row">
-                <form id="send_msg_form">
+                <form id="send_msg_form" class="row">
                     <div class="form-floating mb-3 col-9">
                         <input type="text" class="form-control" id="message_inp" name="user_message" placeholder="Message">
                         <label for="message_inp">Message</label>
@@ -60,9 +60,13 @@
         document.getElementById('messages').appendChild(newNode);
     })
     socket.on('join_room_announcement',(data)=>{
-        console.log(data);
         let newNode = document.createElement('div');
         newNode.innerHTML = `<b>${data['username']}</b> has joined the room : ${data['room']}.`;
+        document.getElementById('messages').appendChild(newNode);
+    })
+    socket.on('left_room',(data)=>{
+        let newNode = document.createElement('div');
+        newNode.innerHTML = `<b>${data['username']}</b> has left the room : ${data['room']}.`;
         document.getElementById('messages').appendChild(newNode);
     })
 </script>
