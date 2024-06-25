@@ -2,7 +2,8 @@ from flask import Flask,render_template,request,session,redirect,url_for
 from flask_socketio import SocketIO,send,join_room,leave_room
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
 import os
-from db import get_user,save_user
+from db import get_user,save_user,create_room,get_room
+from pymongo import errors
 
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 8000))
@@ -22,14 +23,28 @@ def handle_message():
 @login_required
 def handle_chat():
     room_name = request.form.get('room_name')
-    user_name = request.form.get('user_name')
-    # room_name_pass = request.form.get('room_name_pass')
+    # user_name = request.form.get('user_name')
+    room_name_pass = request.form.get('room_name_pass')
     room_action = request.form.get('room_action')
+    err_message = ''
     if room_action == 'Create':
-        return render_template('chat.html',room=room_name,user=user_name)
+        try:
+            create_room(room_name,room_name_pass)
+        except errors.DuplicateKeyError as ex:
+            err_message = "Room already exists."
+            return render_template('index.html',err_message = err_message,room=room_name)
+        return render_template('chat.html',room=room_name,user=current_user.username)
     else:
-        room_action
-        return render_template('chat.html',room=room_name,user=user_name)
+        room = get_room(room_name)
+        if room:
+            if room.get('password') == room_name_pass:
+                return render_template('chat.html',room=room_name,user=current_user.username)
+            else:
+                err_message = "Entered room password is wrong."
+        else:
+            err_message = "Entered room doesn't exist."
+
+        return render_template('index.html',err_message = err_message,room=room_name)
 
 @socketio.on('join_room')
 def handle_join_room_event(data):
@@ -44,7 +59,7 @@ def handle_send_message_event(data):
 
 @socketio.on('disconnect')
 def on_discount():
-    socketio.emit('left_room',data={'username' : session['user'],'room':session['room']},room=session['room'])   
+    socketio.emit('left_room',data={'username' : current_user.username,'room':session['room']},room=session['room'])   
 
 @login_manager.user_loader
 def load_user(username):
