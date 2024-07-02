@@ -6,10 +6,6 @@
         <h2>Chat App</h2>
         <div class="row col-8 mt-3 mx-auto">
             <form action="/chat" method="post">
-                <!-- <div class="form-floating mb-3">
-                    <input type="text" class="form-control" id="floatingInputUser" name="user_name" placeholder="Name">
-                    <label for="floatingInputUser">User Name</label>
-                </div> -->
                 <div class="form-floating mb-3">
                     <input type="text" class="form-control" required id="floatingInputRoom" name="room_name" placeholder="Room Name" value="{{ room or '' }}">
                     <label for="floatingInputRoom">Room Name</label>

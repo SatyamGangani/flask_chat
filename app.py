@@ -1,8 +1,8 @@
-from flask import Flask,render_template,request,session,redirect,url_for
+from flask import Flask,render_template,request,session,redirect,url_for,jsonify
 from flask_socketio import SocketIO,send,join_room,leave_room
 from flask_login import LoginManager,login_user,login_required,logout_user,current_user
 import os
-from db import get_user,save_user,create_room,get_room
+from db import get_user,save_user,create_room,get_room,save_room_message,get_room_messages,get_number_of_messages,delete_message_history
 from pymongo import errors
 
 app = Flask(__name__)
@@ -14,6 +14,22 @@ login_manager = LoginManager()
 login_manager.login_view = 'login'
 login_manager.init_app(app)
 
+@app.route('/rooms/<room_id>/messages')
+@login_required
+def get_paginated_message(room_id):
+    page = request.args.get('page',1)
+    try:
+        page = eval(page)
+    except:
+        page = 1
+    messages = get_room_messages(room_id,page=page)
+    return jsonify(messages)
+
+@app.route('/rooms/<room_id>/delete_history')
+@login_required
+def delete_chat(room_id):
+    messages = delete_message_history(room_id)
+    return "SUCCESS"
 
 @socketio.on("message")
 def handle_message():
@@ -38,7 +54,9 @@ def handle_chat():
         room = get_room(room_name)
         if room:
             if room.get('password') == room_name_pass:
-                return render_template('chat.html',room=room_name,user=current_user.username)
+                chat = get_room_messages(room_name)
+                num_of_pg = get_number_of_messages(room_name)
+                return render_template('chat.html',room=room_name,user=current_user.username,chat_messages = chat,num_of_pg = num_of_pg)
             else:
                 err_message = "Entered room password is wrong."
         else:
@@ -50,16 +68,26 @@ def handle_chat():
 def handle_join_room_event(data):
     app.logger.info(f'{data["username"]} has joined the room : {data["room"]}')
     join_room(room=data['room'])
+    session['room'] = data['room']
     socketio.emit('join_room_announcement',data,room=data['room'])
 
 @socketio.on('send_message')
 def handle_send_message_event(data):
     app.logger.info(f'{data["username"]} has message in the room : {data["room"]}')
+    save_room_message(data['room'],data['username'],data['message'])
     socketio.emit('receive_message',data,room=data['room'])
 
+@socketio.on('typing_message')
+def handle_send_message_event(data):
+    socketio.emit('typing_info',data,room=data['room'])
+
+@socketio.on('not_typing_message')
+def handle_send_message_event(data):
+    socketio.emit('not_typing_info',data,room=data['room'])
+
 @socketio.on('disconnect')
-def on_discount():
-    socketio.emit('left_room',data={'username' : current_user.username,'room':session['room']},room=session['room'])   
+def on_disconnect():
+    socketio.emit('left_room',data={'username' : current_user.username,'room':session['room']},room=session['room'])
 
 @login_manager.user_loader
 def load_user(username):
